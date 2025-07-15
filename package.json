@@ -1,0 +1,27 @@
+{
+  "name": "vaccination_drive",
+  "version": "1.0.0",
+  "description": "This is a applcation that takes data and store it in a mongoDB platform",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git init"
+  },
+  "keywords": [
+    "VACCINATION"
+  ],
+  "author": "Anik Jana",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.3",
+    "nodemon": "^3.1.10",
+    "path": "^0.12.7"
+  }
+}

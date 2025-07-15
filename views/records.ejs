@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Immunisation Records</title>
+    <style>
+        /* ... (All your existing on-screen CSS remains the same) ... */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .btn.print-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table th {
+            background-color: #f2f5f7;
+        }
+
+        /* ⭐️ MODIFIED: Print-specific CSS for the 2-column grid layout ⭐️ */
+        #print-container {
+            display: none;
+            /* Hidden on screen */
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                /* Reduced page margins to give content more space */
+                margin: 4mm;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body>.container {
+                display: none;
+            }
+
+            #print-container {
+                display: block;
+            }
+
+            .print-page {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                /* Reduced gap between cards */
+                gap: 4mm;
+                page-break-after: always;
+            }
+
+            .printable-record {
+                border: 1px solid #b0b0b0;
+                /* Reduced padding inside each card */
+                padding: 2mm;
+                box-sizing: border-box;
+                page-break-inside: avoid;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                /* REMOVED the fixed height to allow natural flow */
+            }
+
+            .printable-header h3 {
+                /* Smaller font size */
+                font-size: 10pt;
+                font-weight: bold;
+                margin: 0;
+            }
+
+            .printable-header p {
+                /* Smaller font size */
+                font-size: 8.5pt;
+                /* Tighter margin */
+                margin: 2px 0 6px 0;
+            }
+
+            .printable-body p {
+                /* Smaller font size */
+                font-size: 8pt;
+                /* Tighter margin and line height for density */
+                margin: 2px 0;
+                line-height: 1.2;
+            }
+
+            .printable-body p strong {
+                display: inline-block;
+                /* Adjusted width for smaller font */
+                width: 100px;
+            }
+
+            .printable-footer {
+                border-top: 1px solid #ddd;
+                padding-top: 5px;
+                margin-top: 8px;
+            }
+
+            .printable-footer p {
+                /* Smaller font size and tighter line height */
+                font-size: 7.5pt;
+                margin: 0;
+                line-height: 1.1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Immunisation Records</h1>
+        <div class="controls-bar">
+            <form id="controlsForm" action="/immunisation/records" method="GET">
+                 <input type="text" name="search" class="search-bar" placeholder="Search by name..." value="<%= currentSearch %>">
+                
+                <select name="gender" class="filter-select">
+                    <option value="all" <%= currentFilters.gender === 'all' ? 'selected' : '' %>>All Genders</option>
+                    <option value="male" <%= currentFilters.gender === 'male' ? 'selected' : '' %>>Male</option>
+                    <option value="female" <%= currentFilters.gender === 'female' ? 'selected' : '' %>>Female</option>
+                    <option value="other" <%= currentFilters.gender === 'other' ? 'selected' : '' %>>Other</option>
+                </select>
+
+                <select name="vaccineType" class="filter-select">
+                    <option value="all" <%= currentFilters.vaccineType === 'all' ? 'selected' : '' %>>All Vaccine Types</option>
+                    <option value="first-dose" <%= currentFilters.vaccineType === 'first-dose' ? 'selected' : '' %>>First Dose</option>
+                    <option value="second-dose" <%= currentFilters.vaccineType === 'second-dose' ? 'selected' : '' %>>Second Dose</option>
+                    <option value="booster" <%= currentFilters.vaccineType === 'booster' ? 'selected' : '' %>>Booster</option>
+                    <option value="precaution" <%= currentFilters.vaccineType === 'precaution' ? 'selected' : '' %>>Precaution</option>
+                </select>
+
+                <!-- Hidden inputs to maintain sorting state -->
+                <input type="hidden" name="sortBy" value="<%= currentSort.sortBy %>">
+                <input type="hidden" name="order" value="<%= currentSort.order %>">
+                
+                <button type="submit" class="btn">Apply</button>
+            </form>
+            <button id="printBtn" class="btn print-btn" disabled>Print Selected</button>
+        </div>
+       <table class="data-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAllCheckbox"></th>
+                    <!-- ⭐️ ADDED: Sortable Table Headers ⭐️ -->
+                    <th><a href="#" class="sort-link" data-sort="name">Name <span class="sort-icon"><%= currentSort.sortBy === 'name' ? (currentSort.order === 'asc' ? '▲' : '▼') : '◇' %></span></a></th>
+                    <th><a href="#" class="sort-link" data-sort="age">Age <span class="sort-icon"><%= currentSort.sortBy === 'age' ? (currentSort.order === 'asc' ? '▲' : '▼') : '◇' %></span></a></th>
+                    <th>Gender</th>
+                    <th>Vaccine Name</th>
+                    <th>Vaccine Type</th>
+                    <th><a href="#" class="sort-link" data-sort="vaccinationDate">Vaccination Date <span class="sort-icon"><%= currentSort.sortBy === 'vaccinationDate' ? (currentSort.order === 'asc' ? '▲' : '▼') : '◇' %></span></a></th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if(records.length > 0) { %>
+                    <% records.forEach(record => { %>
+                        <tr data-record='<%= JSON.stringify(record) %>'>
+                            <td><input type="checkbox" class="record-checkbox"></td>
+                            <td><%= record.name %></td>
+                            <td><%= record.age %></td>
+                            <td><%= record.gender %></td>
+                            <td><%= record.vaccineName %></td>
+                            <td><%= record.vaccineType %></td>
+                            <td><%= new Date(record.vaccinationDate).toLocaleDateString() %></td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr><td colspan="7" style="text-align:center; padding: 20px;">No records found.</td></tr>
+                <% } %>
+            </tbody>
+        </table>
+        <!-- Pagination -->
+           <!-- ⭐️ ADDED: Pagination that preserves search/filter/sort state ⭐️ -->
+        <% if(totalPages > 0) { %>
+            <div class="pagination">
+                <% 
+                    const queryParams = new URLSearchParams({
+                        search: currentSearch,
+                        ...currentFilters,
+                        sortBy: currentSort.sortBy,
+                        order: currentSort.order
+                    }).toString();
+                %>
+                <a href="?page=<%= currentPage - 1 %>&<%= queryParams %>" class="<%= currentPage === 1 ? 'disabled' : '' %>">Previous</a>
+                
+                <% for(let i = 1; i <= totalPages; i++) { %>
+                    <a href="?page=<%= i %>&<%= queryParams %>" class="<%= i === currentPage ? 'current' : '' %>"><%= i %></a>
+                <% } %>
+        
+                <a href="?page=<%= currentPage + 1 %>&<%= queryParams %>" class="<%= currentPage === totalPages ? 'disabled' : '' %>">Next</a>
+            </div>
+        <% } %>
+    </div>
+
+    <!-- This hidden container is the target for our print-ready HTML -->
+    <div id="print-container"></div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const recordCheckboxes = document.querySelectorAll('.record-checkbox');
+            const printBtn = document.getElementById('printBtn');
+            const controlsForm = document.getElementById('controlsForm');
+            const sortLinks = document.querySelectorAll('.sort-link');
+
+            //⭐️ ADDED: Event listener for sortable column headers ⭐️
+                sortLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        const sortByField = this.dataset.sort;
+                        const currentSortBy = controlsForm.elements.sortBy.value;
+                        const currentOrder = controlsForm.elements.order.value;
+                        
+                        if (sortByField === currentSortBy) {
+                            controlsForm.elements.order.value = currentOrder === 'asc' ? 'desc' : 'asc';
+                        } else {
+                            controlsForm.elements.sortBy.value = sortByField;
+                            controlsForm.elements.order.value = 'asc';
+                        }
+                        
+                        controlsForm.submit();
+                    });
+                });
+
+            // --- Logic to enable/disable print button and manage checkboxes ---
+            function updatePrintButtonState() {
+                const checkedCount = document.querySelectorAll('.record-checkbox:checked').length;
+                printBtn.disabled = checkedCount === 0;
+                selectAllCheckbox.checked = recordCheckboxes.length > 0 && checkedCount === recordCheckboxes.length;
+            }
+            selectAllCheckbox.addEventListener('change', function () {
+                recordCheckboxes.forEach(checkbox => checkbox.checked = this.checked);
+                updatePrintButtonState();
+            });
+            recordCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updatePrintButtonState);
+            });
+            updatePrintButtonState(); // Initial check
+
+
+            // --- ⭐️ MODIFIED: The core printing logic ⭐️ ---
+            printBtn.addEventListener('click', function () {
+                const printContainer = document.getElementById('print-container');
+                printContainer.innerHTML = ''; // Clear previous print content
+
+                const selectedCheckboxes = document.querySelectorAll('.record-checkbox:checked');
+
+                let currentPageWrapper = null;
+
+                selectedCheckboxes.forEach((checkbox, index) => {
+                    // Start a new A4 page wrapper for every 8 records
+                    if (index % 8 === 0) {
+                        currentPageWrapper = document.createElement('div');
+                        currentPageWrapper.className = 'print-page';
+                        printContainer.appendChild(currentPageWrapper);
+                    }
+
+                    // ⭐️ MODIFIED: Get data from the data-record attribute, not table cells ⭐️
+                    const row = checkbox.closest('tr');
+                    const record = JSON.parse(row.dataset.record);
+
+                    // Create the new, structured HTML for one certificate
+                    const recordHtml = `
+                    <div class="printable-record">
+                        <div class="printable-header">
+                            <h3>Lions Club of Contai</h3>
+                            <p>Immunisation Id - 2303</p>
+                        </div>
+
+                        <div class="printable-body">
+                            <p><strong>Beneficiary Name:</strong> ${record.name || 'N/A'}</p>
+                            <p><strong>Age:</strong> ${record.age || 'N/A'}</p>
+                            <p><strong>Gender:</strong> ${record.gender || 'N/A'}</p>
+                            <p><strong>Mobile No:</strong> ${record.mobile || 'N/A'}</p>
+                            <p><strong>Address:</strong> ${record.address || 'N/A'}</p>
+                            <p><strong>Vaccine Name:</strong> ${record.vaccineName || 'N/A'}</p>
+                            <p><strong>Dose Type:</strong> ${record.vaccineType || 'N/A'}</p>
+                            <p><strong>Date of Dose:</strong> ${new Date(record.vaccinationDate).toLocaleDateString()}</p>
+                            <p><strong>Vaccinated at:</strong> ${record.vaccinationCenter || 'N/A'}</p>
+                            <p><strong>Individual ID:</strong> ${record.immunisationId || 'N/A'}</p>
+                        </div>
+
+                        <div class="printable-footer">
+                            <p><strong>Dr. Nandita Pattanayak</strong></p>
+                            <p>Chairman: Immunisation Committee</p>
+                        </div>
+                    </div>
+                `;
+
+                    currentPageWrapper.innerHTML += recordHtml;
+                });
+                // Once all records are built into the structure, trigger the print dialog
+                window.print();
+            });
+        });
+    </script>
+
+</body>
+
+</html>

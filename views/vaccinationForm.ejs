@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vaccination Program</title>
+    <style>
+        /* ... (Your existing CSS is perfect and remains here) ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background elements */
+        .bg-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        /* Form container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 900px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            z-index: 2;
+            animation: slideIn 0.8s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-title {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        /* Form row for side-by-side layout */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 0;
+        }
+
+        /* Form section */
+        .form-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .section-title {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-input:focus {
+            border-color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-input:valid {
+            border-color: rgba(76, 175, 80, 0.8);
+        }
+
+        /* Select dropdown styling */
+        .form-input option {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+            padding: 10px;
+        }
+
+        /* Date input specific styling */
+        .form-input[type="date"]::-webkit-calendar-picker-indicator,
+        .form-input[type="month"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Error styling */
+        .error-message {
+            color: rgba(244, 67, 54, 0.9);
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+        
+        /* ... More of your existing CSS ... */
+
+        /* ⭐️ ADDED: Styles for the Error Modal ⭐️ */
+        .modal-overlay {
+            position: fixed;
+            display: none;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .modal-header h2 {
+            color: #ff6b6b; /* A lighter red for the theme */
+            font-size: 1.8rem;
+            margin: 0 0 15px 0;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-body p {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .modal-close-btn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #ff8a8a 0%, #ff5252 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .modal-close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 82, 82, 0.4);
+        }
+
+        /* The button that opens the panel */
+        .menu-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001; /* Ensures it's above the content but below the panel */
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .menu-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        /* The sliding panel itself */
+        .side-panel {
+            height: 100%;
+            width: 280px;
+            position: fixed;
+            z-index: 1002; /* Highest z-index to be on top of everything */
+            top: 0;
+            right: -280px; /* Start hidden off-screen to the right */
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(25px);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-x: hidden;
+            transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smooth sliding animation */
+            padding-top: 60px;
+        }
+
+        /* This class will be added by JavaScript to show the panel */
+        .side-panel.open {
+            right: 0; /* Slide into view */
+        }
+
+        /* Link style inside the panel */
+        .side-panel .panel-link {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #f1f1f1;
+            display: block;
+            transition: 0.3s;
+            margin: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .side-panel .panel-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* The 'X' button to close the panel */
+        .side-panel .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            font-size: 36px;
+            color: #f1f1f1;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="bg-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="form-container">
+         <div class="form-header">
+            <h1 class="form-title">Vaccination Record</h1>
+            <p class="form-subtitle">Complete your vaccination information</p>
+        </div>
+
+        <!-- The `action` and `method` attributes are essential for server submission -->
+        <form id="professionalForm" action="/immunisation" method="POST">
+
+            <!-- ⭐️ MODIFIED: Form fields now repopulate on server error ⭐️ -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" id="date" name="date" class="form-input" required value="<%= typeof formData !== 'undefined' ? formData.date : new Date().toISOString().split('T')[0] %>">
+                </div>
+                <div class="form-group">
+                    <label for="name" class="form-label">Full Name</label>
+                    <input type="text" id="name" name="name" class="form-input" placeholder="Enter your full name" required value="<%= typeof formData !== 'undefined' ? formData.name : '' %>">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age" class="form-label">Age</label>
+                    <input type="number" id="age" name="age" class="form-input" placeholder="Enter age" min="1" max="150" required value="<%= typeof formData !== 'undefined' ? formData.age : '' %>">
+                </div>
+                <div class="form-group">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select id="gender" name="gender" class="form-input" required>
+                        <option value="">Select Gender</option>
+                        <option value="male" <%= (typeof formData !== 'undefined' && formData.gender === 'male') ? 'selected' : '' %>>Male</option>
+                        <option value="female" <%= (typeof formData !== 'undefined' && formData.gender === 'female') ? 'selected' : '' %>>Female</option>
+                        <option value="other" <%= (typeof formData !== 'undefined' && formData.gender === 'other') ? 'selected' : '' %>>Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- (This repopulation pattern is applied to all fields below) -->
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mobile" class="form-label">Mobile No</label>
+                    <input type="tel" id="mobile" name="mobile" class="form-input" placeholder="Enter mobile number" required value="<%= typeof formData !== 'undefined' ? formData.mobile : '' %>">
+                </div>
+                <div class="form-group">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" id="address" name="address" class="form-input" placeholder="Enter address" required value="<%= typeof formData !== 'undefined' ? formData.address : '' %>">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">Vaccination Details</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="vaccineName" class="form-label">Vaccine Name</label>
+                        <select id="vaccineName" name="vaccineName" class="form-input" required>
+                            <option value="">Select Vaccine</option>
+                            <option value="covishield" <%= (typeof formData !== 'undefined' && formData.vaccineName === 'covishield') ? 'selected' : '' %>>Covishield</option>
+                            <option value="covaxin" <%= (typeof formData !== 'undefined' && formData.vaccineName === 'covaxin') ? 'selected' : '' %>>Covaxin</option>
+                            <option value="sputnik" <%= (typeof formData !== 'undefined' && formData.vaccineName === 'sputnik') ? 'selected' : '' %>>Sputnik V</option>
+                            <option value="pfizer" <%= (typeof formData !== 'undefined' && formData.vaccineName === 'pfizer') ? 'selected' : '' %>>Pfizer-BioNTech</option>
+                            <option value="moderna" <%= (typeof formData !== 'undefined' && formData.vaccineName === 'moderna') ? 'selected' : '' %>>Moderna</option>
+                            <option value="johnson" <%= (typeof formData !== 'undefined' && formData.vaccineName === 'johnson') ? 'selected' : '' %>>Johnson & Johnson</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vaccineType" class="form-label">Vaccine Type</label>
+                        <select id="vaccineType" name="vaccineType" class="form-input" required>
+                            <option value="">Select Type</option>
+                            <option value="first-dose" <%= (typeof formData !== 'undefined' && formData.vaccineType === 'first-dose') ? 'selected' : '' %>>First Dose</option>
+                            <option value="second-dose" <%= (typeof formData !== 'undefined' && formData.vaccineType === 'second-dose') ? 'selected' : '' %>>Second Dose</option>
+                            <option value="booster" <%= (typeof formData !== 'undefined' && formData.vaccineType === 'booster') ? 'selected' : '' %>>Booster</option>
+                            <option value="precaution" <%= (typeof formData !== 'undefined' && formData.vaccineType === 'precaution') ? 'selected' : '' %>>Precaution Dose</option>
+                        </select>
+                    </div>
+                </div>
+                 <div class="form-row">
+                    <div class="form-group">
+                        <label for="manufacturer" class="form-label">Manufactured By</label>
+                        <input type="text" id="manufacturer" name="manufacturer" class="form-input" placeholder="Enter manufacturer name" required value="<%= typeof formData !== 'undefined' ? formData.manufacturer : '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="batchNo" class="form-label">Vaccine Batch No</label>
+                        <input type="text" id="batchNo" name="batchNo" class="form-input" placeholder="Enter batch number" required value="<%= typeof formData !== 'undefined' ? formData.batchNo : '' %>">
+                    </div>
+                </div>
+                 <div class="form-row">
+                    <div class="form-group">
+                        <label for="vaccinationDate" class="form-label">Vaccination Date</label>
+                        <input type="date" id="vaccinationDate" name="vaccinationDate" class="form-input" required value="<%= typeof formData !== 'undefined' ? formData.vaccinationDate : '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="vaccinationCenter" class="form-label">Vaccination Center</label>
+                        <input type="text" id="vaccinationCenter" name="vaccinationCenter" class="form-input" placeholder="Enter vaccination center" required value="<%= typeof formData !== 'undefined' ? formData.vaccinationCenter : '' %>">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nextDueMonth" class="form-label">Next Due Month</label>
+                        <input type="month" id="nextDueMonth" name="nextDueMonth" class="form-input" required value="<%= typeof formData !== 'undefined' ? formData.nextDueMonth : '' %>">
+                    </div>
+                    <div class="form-group">
+                        <label for="immunisationId" class="form-label">Immunisation ID</label>
+                        <input type="text" id="immunisationId" name="immunisationId" class="form-input" placeholder="Enter immunisation ID" required value="<%= typeof formData !== 'undefined' ? formData.immunisationId : '' %>">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Submit Vaccination Record
+            </button>
+        </form>
+    </div>
+
+    <!-- ⭐️ ADDED: HTML structure for the error modal ⭐️ -->
+    <div id="errorModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Submission Failed</h2>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessageText"></p>
+            </div>
+            <button id="closeModalBtn" class="modal-close-btn">Try Again</button>
+        </div>
+    </div>
+
+        <!-- ⭐️ ADDED: HTML for the toggle button and the sliding panel ⭐️ -->
+    <button id="menuToggleBtn" class="menu-toggle-btn" title="View Records">≡</button>
+
+    <div id="sidePanel" class="side-panel">
+        <a href="javascript:void(0)" class="close-btn" id="closePanelBtn" title="Close">×</a>
+        <a href="/immunisation/records" class="panel-link">View All Records</a>
+        <!-- You can add more links here in the future -->
+    </div>
+    
+    <!-- ⭐️ ADDED: Script to control the error modal based on server feedback ⭐️ -->
+    <script>
+        // This EJS script block checks for variables passed from your Node.js controller.
+        if (typeof showErrorModal !== 'undefined' && showErrorModal) 
+            // This code will only be included in the HTML if the server finds an error.
+            document.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('errorModal');
+                const modalMessage = document.getElementById('errorMessageText');
+                const closeButton = document.getElementById('closeModalBtn');
+
+                // Safely inject the error message from the server into the modal's paragraph.
+                // JSON.stringify prevents errors from special characters in the message.
+                modalMessage.innerText = JSON.stringify(errorMessage);
+                
+                // Show the modal by changing its display style.
+                modal.style.display = 'flex';
+
+                // Function to close the modal
+                const closeModal = function() {
+                    modal.style.display = 'none';
+                };
+
+                // Add event listener to the close button.
+                closeButton.onclick = closeModal;
+            });
+
+                // ⭐️ ADDED: JavaScript to control the new sliding panel ⭐️
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get references to the new elements
+            const menuToggleBtn = document.getElementById('menuToggleBtn');
+            const closePanelBtn = document.getElementById('closePanelBtn');
+            const sidePanel = document.getElementById('sidePanel');
+
+            // When the toggle button is clicked, add the 'open' class to the panel
+            menuToggleBtn.addEventListener('click', function() {
+                sidePanel.classList.add('open');
+            });
+
+            // When the 'X' button inside the panel is clicked, remove the 'open' class
+            closePanelBtn.addEventListener('click', function() {
+                sidePanel.classList.remove('open');
+            });
+        });    
+    </script>
+</body>
+
+</html>
